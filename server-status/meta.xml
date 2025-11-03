@@ -1,0 +1,4 @@
+<meta>
+    <info name="TervaRPG Server Status" author="TervaRPG" type="script" />
+    <script src="server.lua" type="server" />
+</meta>
