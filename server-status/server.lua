@@ -5,7 +5,7 @@
 
 local API_URL = "https://api.base44.com/v1"
 local API_KEY = "a260d0f0af8d47c1b28eb217e0eed824" -- Pobierz z Dashboard -> Settings -> Secrets
-local APP_ID = "TUTAJ_ID_APLIKACJI" -- Znajdziesz w URL dashboardu
+local APP_ID = "6901c610f8920fd3e49b1a0e" -- Znajdziesz w URL dashboardu
 local SERVER_CONFIG_ID = "" -- Zostanie automatycznie pobrane przy pierwszym uruchomieniu
 
 function getServerConfigId()
