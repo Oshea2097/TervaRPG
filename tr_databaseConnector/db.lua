@@ -32,4 +32,74 @@ function DB.connect()
         DB.connected = false
         log("Nie udało się połączyć z bazą, próba ponownie za %d sekund...", RECONNECT_DELAY/1000)
         if not connectionTimer then
-            connectionTimer = setTimer(DB.connect, RECONNECT_DELAY,
+            connectionTimer = setTimer(DB.connect, RECONNECT_DELAY, 0)
+        end
+        return false
+    end
+end
+
+function DB.disconnect()
+    if DB.connection and isElement(DB.connection) then
+        destroyElement(DB.connection)
+    end
+    DB.connected = false
+    DB.connection = nil
+    if isTimer(connectionTimer) then
+        killTimer(connectionTimer)
+        connectionTimer = nil
+    end
+    log("Połączenie z bazą zakończone.")
+end
+
+function getConnection()
+    if not DB.connected or not isElement(DB.connection) then
+        DB.connect()
+    end
+    return DB.connection
+end
+
+function query(sql, params, callback)
+    if not getConnection() then return false end
+    local qh = dbQuery(getConnection(), sql, unpack(params or {}))
+    if not qh then
+        log("Błąd zapytania: %s", tostring(sql))
+        return false
+    end
+    if type(callback) == "function" then
+        dbPoll(qh, -1, callback)
+    else
+        local result, _, err = dbPoll(qh, -1)
+        if not result then
+            log("Błąd poll: %s", tostring(err))
+        end
+        return result
+    end
+end
+
+function exec(sql, params)
+    if not getConnection() then return false end
+    local ok = dbExec(getConnection(), sql, unpack(params or {}))
+    if not ok then
+        log("Błąd exec: %s", sql)
+    end
+    return ok
+end
+
+function fetchOne(sql, params)
+    local result = query(sql, params)
+    if result and #result > 0 then
+        return result[1]
+    end
+    return nil
+end
+
+addEventHandler("onResourceStart", resourceRoot, function()
+    DB.connect()
+end)
+
+addEventHandler("onResourceStop", resourceRoot, function()
+    DB.disconnect()
+end)
+
+-- Eksporty
+_G.DB = DB
