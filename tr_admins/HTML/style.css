@@ -8,7 +8,7 @@ body {
 }
 
 #panel {
-  width: 700px;
+  width: 750px;
   background: #10141b;
   border-radius: 12px;
   color: #fff;
@@ -40,19 +40,14 @@ header h1 {
   cursor: pointer;
 }
 
-#close:hover {
-  background: #f44;
-}
+#close:hover { background: #f44; }
 
-section#adminInfo {
-  margin-top: 15px;
-}
+section#adminInfo { margin-top: 15px; }
 
 nav {
   display: flex;
-  flex-wrap: wrap;
   gap: 10px;
-  margin-top: 20px;
+  margin-top: 15px;
 }
 
 nav button {
@@ -66,10 +61,32 @@ nav button {
   transition: background 0.2s;
 }
 
-nav button:hover {
-  background: #47b0ff;
-  color: white;
+nav button:hover { background: #47b0ff; color: white; }
+
+.hidden { display: none; }
+
+#players table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
 }
+
+#players th, #players td {
+  padding: 8px;
+  border-bottom: 1px solid #333;
+}
+
+#players button {
+  background: #283044;
+  color: #fff;
+  border: none;
+  padding: 5px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+#players button:hover { background: #47b0ff; }
 
 footer {
   text-align: center;
