@@ -4,6 +4,10 @@
     <script src="admin_server.lua" type="server"/>
     <script src="admin_client.lua" type="client"/>
 
+    <file src="html/index.html"/>
+    <file src="html/style.css"/>
+    <file src="html/script.js"/>
+
     <dependency resource="tr_databaseConnector"/>
 
     <oop>true</oop>
