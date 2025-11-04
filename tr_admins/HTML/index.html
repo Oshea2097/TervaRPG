@@ -20,10 +20,10 @@
 
     <nav>
       <button onclick="showSection('players')">Gracze</button>
-      <button>Kary</button>
-      <button>Logi</button>
-      <button>Pojazdy</button>
-      <button>Frakcje</button>
+      <button onclick="showSection('punishments')">Kary</button>
+      <button onclick="showSection('logs')">Logi</button>
+      <button onclick="showSection('vehicles')">Pojazdy</button>
+      <button onclick="showSection('factions')">Frakcje</button>
     </nav>
 
     <section id="players" class="hidden">
@@ -33,6 +33,39 @@
         <tbody></tbody>
       </table>
     </section>
+
+    <section id="punishments" class="hidden">
+      <h2>Kary</h2>
+      <p>Wybierz gracza z listy <em>Gracze</em>, a następnie użyj formularza poniżej, aby nałożyć karę.</p>
+
+      <div class="punish-form">
+        <label>Cel (nick): <input id="punishTarget" type="text" /></label>
+        <label>Typ:
+          <select id="punishType">
+            <option value="ban">Ban</option>
+            <option value="mute">Mute</option>
+            <option value="warn">Warn</option>
+            <option value="unban">Unban</option>
+          </select>
+        </label>
+        <label>Czas (minuty, 0 = permanent/instant): <input id="punishMinutes" type="number" min="0" value="0" /></label>
+        <label>Powód: <input id="punishReason" type="text" /></label>
+        <div style="margin-top:10px;">
+          <button onclick="submitPunishment()">Wykonaj</button>
+        </div>
+      </div>
+
+      <div id="punishLog"></div>
+    </section>
+
+    <section id="logs" class="hidden">
+      <h2>Logi administracyjne</h2>
+      <div id="logsContainer">Brak danych.</div>
+    </section>
+
+    <!-- placeholders -->
+    <section id="vehicles" class="hidden"><h2>Pojazdy</h2><p>Wkrótce</p></section>
+    <section id="factions" class="hidden"><h2>Frakcje</h2><p>Wkrótce</p></section>
 
     <footer>
       <p>TervaRPG — system administracji</p>
