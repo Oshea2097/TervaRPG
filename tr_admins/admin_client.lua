@@ -1,4 +1,4 @@
--- tr_admins/admin_client.lua
+-- tr_admins/admin_client.lua (client-side)
 
 local panelVisible = false
 local browser = nil
@@ -26,7 +26,7 @@ end
 
 function destroyAdminPanel()
     if not panelVisible then return end
-    destroyElement(browser)
+    if isElement(browser) then destroyElement(browser) end
     showCursor(false)
     browser = nil
     panelVisible = false
@@ -54,6 +54,15 @@ end)
 addEvent("admin:notify", true)
 addEventHandler("admin:notify", root, function(msg)
     if browser and isElement(browser) then
-        executeBrowserJavascript(browser, string.format("notify('%s')", msg))
+        executeBrowserJavascript(browser, string.format("notify('%s')", tostring(msg):gsub("'","\\'")))
+    else
+        outputChatBox("[ADMIN] "..tostring(msg), 255, 200, 70)
     end
+end)
+
+-- JS -> Lua bridge: receive admin actions from UI
+addEvent("admin:clientAction", true)
+addEventHandler("admin:clientAction", root, function(action, payload)
+    -- forward to server
+    triggerServerEvent("admin:action", resourceRoot, action, payload)
 end)
