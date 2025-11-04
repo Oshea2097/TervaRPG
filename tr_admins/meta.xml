@@ -1,0 +1,10 @@
+<meta>
+    <info author="TervaRPG Dev" version="1.0" type="script" name="Terva Admin System"/>
+
+    <script src="admin_server.lua" type="server"/>
+    <script src="admin_client.lua" type="client"/>
+
+    <dependency resource="tr_databaseConnector"/>
+
+    <oop>true</oop>
+</meta>
