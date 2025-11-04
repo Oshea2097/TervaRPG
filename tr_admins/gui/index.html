@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TervaRPG - Panel Administracyjny</title>
+  <link rel="stylesheet" href="style.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+  <div class="panel">
+    <aside class="sidebar">
+      <div class="logo">
+        <img src="https://cdn-icons-png.flaticon.com/512/3616/3616781.png" alt="logo" />
+        <h2>TervaRPG</h2>
+        <p class="subtitle">Panel Administracyjny</p>
+      </div>
+      <nav class="menu">
+        <button class="menu-btn active" data-section="home">🏠 Strona główna</button>
+        <button class="menu-btn" data-section="players">👥 Zarządzanie graczami</button>
+        <button class="menu-btn" data-section="ranks">🛡️ Rangi administracji</button>
+        <button class="menu-btn" data-section="logs">📜 Logi</button>
+        <button class="menu-btn" data-section="settings">⚙️ Ustawienia</button>
+      </nav>
+      <button class="exit-btn" id="closePanel">Zamknij panel (F2)</button>
+    </aside>
+
+    <main class="content">
+      <section id="home" class="section active">
+        <h1>Witaj w panelu TervaRPG</h1>
+        <p>Użyj menu po lewej, aby zarządzać serwerem.</p>
+      </section>
+
+      <section id="players" class="section">
+        <h1>Zarządzanie graczami</h1>
+        <p>Tutaj pojawi się lista graczy oraz akcje administracyjne.</p>
+      </section>
+
+      <section id="ranks" class="section">
+        <h1>Rangi administracji</h1>
+        <ul>
+          <li>Root</li>
+          <li>Opiekun administracji</li>
+          <li>Starszy administrator</li>
+          <li>Administrator</li>
+          <li>Moderator</li>
+          <li>Helper</li>
+        </ul>
+      </section>
+
+      <section id="logs" class="section">
+        <h1>Logi administracyjne</h1>
+        <p>Tutaj będą logi z działań administracyjnych.</p>
+      </section>
+
+      <section id="settings" class="section">
+        <h1>Ustawienia panelu</h1>
+        <p>W przyszłości: personalizacja interfejsu, dźwięki, kolory itp.</p>
+      </section>
+    </main>
+  </div>
+  <script src="script.js"></script>
+</body>
+</html>
