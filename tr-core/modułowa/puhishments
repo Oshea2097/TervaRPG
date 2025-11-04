@@ -1,0 +1,39 @@
+-- bans/warns stored in punishments table (by serial)
+
+local Punishments = {}
+Punishments.__index = Punishments
+
+function Punishments:new(core)
+    local o = { core = core }
+    setmetatable(o, self)
+    core.db:prepare("punishments_check", "SELECT id, type, until_ts, reason, admin, created_at FROM punishments WHERE serial = ? AND type = 'ban' ORDER BY created_at DESC")
+    core.db:prepare("punishments_add", "INSERT INTO punishments (serial, type, until_ts, reason, admin, created_at) VALUES (?, ?, ?, ?, ?, NOW())")
+    return o
+end
+
+function Punishments:isBannedBySerial(serial)
+    if not serial then return false end
+    local ok, res = self.core.db:execPrepared("punishments_check", serial)
+    if not ok then return false, nil end
+    local now = os.time()
+    for _,r in ipairs(res) do
+        local until_ts = tonumber(r.until_ts) or 0
+        if until_ts == 0 or until_ts > now then
+            return true, { until = until_ts, reason = r.reason, admin = r.admin }
+        end
+    end
+    return false, nil
+end
+
+function Punishments:ban(serial, minutes, reason, admin)
+    local until_ts = 0
+    if minutes and tonumber(minutes) and tonumber(minutes) > 0 then until_ts = os.time() + tonumber(minutes) * 60 end
+    local ok, res = self.core.db:execPrepared("punishments_add", serial, "ban", until_ts, reason or "", admin or "console")
+    return ok, res
+end
+
+function Punishments:warn(serial, reason, admin)
+    return self.core.db:execPrepared("punishments_add", serial, "warn", 0, reason or "", admin or "console")
+end
+
+return Punishments
