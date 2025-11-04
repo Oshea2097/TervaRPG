@@ -1,0 +1,4 @@
+<meta>
+    <info name="Vehicles System" author="TervaRPG" version="1.0" type="server" />
+    <script src="vehicles.lua" type="server" />
+</meta>
