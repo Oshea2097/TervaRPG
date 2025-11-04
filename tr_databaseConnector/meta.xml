@@ -1,0 +1,9 @@
+<meta>
+    <info author="Tomasz (TSBM) Rzepka" version="1.0" type="script" name="Terva Database Connector"/>
+    <script src="db.lua" type="server"/>
+
+    <export function="getConnection" type="server"/>
+    <export function="query" type="server"/>
+    <export function="exec" type="server"/>
+    <export function="fetchOne" type="server"/>
+</meta>
