@@ -55,3 +55,44 @@ end)
 addCommandHandler("adminpanel", function(player)
     triggerEvent("admin:requestOpen", player)
 end)
+-- DODAJ NA DOLE PLIKU admin_server.lua
+
+-- Zwróć listę graczy online
+addEvent("admin:requestPlayers", true)
+addEventHandler("admin:requestPlayers", root, function()
+    local players = {}
+    for _, p in ipairs(getElementsByType("player")) do
+        table.insert(players, {
+            name = getPlayerName(p),
+            id = getElementData(p, "player:tid") or 0,
+            serial = getPlayerSerial(p)
+        })
+    end
+    triggerClientEvent(client, "admin:receivePlayers", client, players)
+end)
+
+-- Akcje administracyjne
+addEvent("admin:action", true)
+addEventHandler("admin:action", root, function(action, targetName)
+    local admin = client
+    local target = getPlayerFromName(targetName)
+    if not isElement(target) then
+        triggerClientEvent(admin, "admin:notify", admin, "Gracz nie znaleziony.")
+        return
+    end
+
+    if action == "tpTo" then
+        setElementPosition(admin, getElementPosition(target))
+        triggerClientEvent(admin, "admin:notify", admin, "Teleportowano do gracza " .. targetName)
+    elseif action == "tpHere" then
+        setElementPosition(target, getElementPosition(admin))
+        triggerClientEvent(admin, "admin:notify", admin, "Gracz " .. targetName .. " przeteleportowany do ciebie.")
+    elseif action == "mute" then
+        setPlayerMuted(target, true)
+        triggerClientEvent(admin, "admin:notify", admin, "Gracz " .. targetName .. " został zmutowany.")
+    elseif action == "kick" then
+        kickPlayer(target, admin, "Wyrzucony przez administrację.")
+    else
+        triggerClientEvent(admin, "admin:notify", admin, "Nieznana akcja.")
+    end
+end)
