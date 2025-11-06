@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<resource>
+    <info author="TervaRPG Team" type="script" version="1.0">Terva Scoreboard</info>
+
+    <!-- server -->
+    <script src="server.lua" type="server" />
+
+    <!-- client -->
+    <script src="client.lua" type="client" />
+
+    <!-- assets -->
+    <file>assets/fonts/HoneySalt.ttf</file>
+    <file>assets/img/board_bg.png</file>
+
+    <!-- optional icons if you later add them -->
+    <file>assets/img/search.png</file>
+    <file>assets/img/rank_icons/root.png</file>
+    <file>assets/img/rank_icons/admin.png</file>
+    <file>assets/img/rank_icons/helper.png</file>
+
+    <dependency>scoreboard</dependency>
+</resource>
