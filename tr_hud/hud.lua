@@ -1,87 +1,89 @@
 -- file: hud/client.lua
 
 local sx, sy = guiGetScreenSize()
+local scale = sx / 1920
 
--- icon paths
 local iconHeart = dxCreateTexture("images/heart.png")
 local iconArmor = dxCreateTexture("images/armor.png")
 
--- placeholder hunger/thirst
-local hunger = 70
-local thirst = 40
+local hunger = 75
+local thirst = 55
 
--- radar config
-local radarSize = 240
-local radarX = 20
-local radarY = sy - radarSize - 20
+-- RADAR SETTINGS
+local radarSize = 220 * scale
+local radarX = 30 * scale
+local radarY = sy - radarSize - 40 * scale
 
--- hunger/thirst bars
-local barW = 12
+-- Bars next to radar
+local barW = 14 * scale
 local barH = radarSize
-local barGap = 10
+local barGap = 12 * scale
 
 local hungerX = radarX + radarSize + barGap
 local thirstX = hungerX + barW + barGap
 local barsY = radarY
 
--- HUD top-right
-local hudW = 320
-local hudH = 160
-local hudX = sx - hudW - 20
-local hudY = 20
+-- HUD TOP-RIGHT
+local hudW = 360 * scale
+local hudH = 165 * scale
+local hudX = sx - hudW - 30 * scale
+local hudY = 30 * scale
 
-local function drawBar(x, y, w, h, progress, r, g, b)
-    dxDrawRectangle(x, y, w, h, tocolor(0, 0, 0, 120))
-    dxDrawRectangle(x, y + (1 - progress) * h, w, progress * h, tocolor(r, g, b, 230))
+local function drawVerticalBar(x, y, w, h, progress, color)
+    dxDrawRectangle(x, y, w, h, tocolor(25, 25, 25, 120))
+    dxDrawRectangle(x, y + h * (1 - progress), w, h * progress, color)
 end
 
 function drawHUD()
     local hp = getElementHealth(localPlayer)
     local armor = getPedArmor(localPlayer)
-    local hpPercent = math.min(hp / 100, 1)
-    local arPercent = math.min(armor / 100, 1)
 
-    dxDrawRectangle(hudX, hudY, hudW, hudH, tocolor(0, 0, 0, 120))
+    local hpPercent = math.min(hp, 100) / 100
+    local arPercent = math.min(armor, 100) / 100
 
-    -- hp bar
-    dxDrawImage(hudX + 20, hudY + 20, 24, 24, iconHeart)
-    dxDrawRectangle(hudX + 60, hudY + 26, 220, 10, tocolor(60, 60, 60, 150))
-    dxDrawRectangle(hudX + 60, hudY + 26, 220 * hpPercent, 10, tocolor(0, 140, 255, 230))
+    -- === HUD PANEL (GLASS STYLE) ===
+    dxDrawRectangle(hudX, hudY, hudW, hudH, tocolor(15, 15, 15, 150), true)
 
-    -- armor bar
-    dxDrawImage(hudX + 20, hudY + 60, 24, 24, iconArmor)
-    dxDrawRectangle(hudX + 60, hudY + 66, 220, 10, tocolor(60, 60, 60, 150))
-    dxDrawRectangle(hudX + 60, hudY + 66, 220 * arPercent, 10, tocolor(160, 160, 160, 230))
+    -- icons size
+    local iconS = 22 * scale
 
-    -- Money + Nick + Date/Time
+    -- === HEALTH BAR ===
+    dxDrawImage(hudX + 25 * scale, hudY + 25 * scale, iconS, iconS, iconHeart)
+    dxDrawRectangle(hudX + 60 * scale, hudY + 30 * scale, 220 * scale, 10 * scale, tocolor(60,60,60,130), true)
+    dxDrawRectangle(hudX + 60 * scale, hudY + 30 * scale, (220 * scale) * hpPercent, 10 * scale, tocolor(50,160,255,240), true)
+
+    -- === ARMOR BAR ===
+    dxDrawImage(hudX + 25 * scale, hudY + 70 * scale, iconS, iconS, iconArmor)
+    dxDrawRectangle(hudX + 60 * scale, hudY + 75 * scale, 220 * scale, 10 * scale, tocolor(60,60,60,130), true)
+    dxDrawRectangle(hudX + 60 * scale, hudY + 75 * scale, (220 * scale) * arPercent, 10 * scale, tocolor(200,200,200,220), true)
+
     local money = getPlayerMoney(localPlayer)
     local nick = getPlayerName(localPlayer)
-    local time = getRealTime()
-    local dateStr = string.format("%02d.%02d.%04d", time.monthday, time.month + 1, time.year + 1900)
-    local hourStr = string.format("%02d:%02d", time.hour, time.minute)
+    local rt = getRealTime()
+    local dateStr = string.format("%02d.%02d.%04d", rt.monthday, rt.month+1, rt.year+1900)
+    local hourStr = string.format("%02d:%02d", rt.hour, rt.minute)
 
-    dxDrawText("$ "..tostring(money), hudX + 20, hudY + 100, hudX + hudW, hudY, tocolor(255, 255, 255), 1.0, "default-bold")
-    dxDrawText("Nick: "..nick, hudX + 20, hudY + 125, hudX + hudW, hudY, tocolor(220, 220, 220), 1.0, "default")
-    dxDrawText(dateStr.."      "..hourStr, hudX + 20, hudY + 145, hudX + hudW, hudY, tocolor(200, 200, 200), 1.0, "default")
+    dxDrawText("$"..money, hudX + 25*scale, hudY + 115*scale, nil,nil, tocolor(255,255,255), 1*scale, "default-bold")
+    dxDrawText("Nick: "..nick, hudX + 25*scale, hudY + 140*scale, nil,nil, tocolor(230,230,230), 0.9*scale, "default")
+    dxDrawText(dateStr.."     "..hourStr, hudX + 25*scale, hudY + 160*scale, nil,nil, tocolor(220,220,220), 0.9*scale, "default")
 
-    -- draw hunger/thirst bars
-    drawBar(hungerX, barsY, barW, barH, hunger / 100, 200, 160, 0)
-    drawBar(thirstX, barsY, barW, barH, thirst / 100, 0, 120, 255)
+    -- === RADAR BORDER (NOT COVERING MAP) ===
+    dxDrawRectangle(radarX - 4, radarY - 4, radarSize + 8, radarSize + 8, tocolor(15,15,15,150))
 
-    -- radar area (classic)
-    -- (GTA radar auto-renders, so only border)
-    dxDrawRectangle(radarX - 3, radarY - 3, radarSize + 6, radarSize + 6, tocolor(0, 0, 0, 100))
+    -- === HUNGER/THIRST ===
+    drawVerticalBar(hungerX, barsY, barW, barH, hunger / 100, tocolor(200,170,40,230))
+    drawVerticalBar(thirstX, barsY, barW, barH, thirst / 100, tocolor(50,130,255,230))
 
-    -- FPS + ping + time (below radar)
+    -- === FPS/PING/TIME ===
     local fps = getFPS()
     local ping = getPlayerPing(localPlayer)
-    local clock = string.format("%02d:%02d", time.hour, time.minute)
+    local clockStr = string.format("%02d:%02d", rt.hour, rt.minute)
 
     dxDrawText(
-        "FPS: "..fps.." | PING: "..ping.."ms | "..clock,
-        radarX, radarY + radarSize + 10,
-        radarX + radarSize, radarY + radarSize + 40,
-        tocolor(255,255,255,200), 1.0, "default-bold", "center"
+        "FPS: "..fps.."  |  Ping: "..ping.."ms  |  "..clockStr,
+        radarX, radarY + radarSize + 15 * scale,
+        radarX + radarSize, nil,
+        tocolor(255,255,255,220), 0.9*scale, "default-bold", "center"
     )
 end
 
