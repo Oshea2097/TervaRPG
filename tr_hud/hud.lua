@@ -1,125 +1,140 @@
 local screenW, screenH = guiGetScreenSize()
-local showHUD = true
-
--- Wyłączenie standardowego HUD
-addEventHandler("onClientResourceStart", resourceRoot, function()
-    for _, comp in ipairs({"radar", "health", "armour", "money", "clock", "weapon", "ammo", "vehicle_name"}) do
-        setPlayerHudComponentVisible(comp, false)
+local zoom = (screenW < 1920) and (screenW / 1920) or 1
+local function sx(v) return v * zoom end
+local function sy(v) return v * zoom end
+local texHP = dxCreateTexture("img/icon_hp.png")
+local texArmour = dxCreateTexture("img/icon_armour.png")
+local texRadar = dxCreateTexture("img/radar.png")
+local fontMain = dxCreateFont("fonts/HoneySalt.ttf", sx(12))
+local smooth = {
+    hp = 0,
+    armour = 0,
+    hunger = 100,
+    thirst = 100,
+}
+local fps, fpsTick = 0, getTickCount()
+addEventHandler("onClientRender", root, function()
+    if getTickCount() - fpsTick >= 1000 then
+        fps = getFPSLimit()
+        fpsTick = getTickCount()
     end
 end)
 
--- Czcionka
-local honeySalt = dxCreateFont("fonts/honey-salt.ttf", 20)
-local iconHP = dxCreateTexture("img/heart.png")
-local iconArmour = dxCreateTexture("img/armour.png")
+local showHUD = true
+bindKey("F5", "down", function() showHUD = not showHUD end)
 
--- Mapa do radaru
-local mapImage = dxCreateTexture("img/map.jpg") -- 3000x3000 najlepiej
-local mapSize = 3000
-
-bindKey("F5", "down", function()
-    showHUD = not showHUD
-end)
-
--- FPS stabilizator
-local fps = 60
-local lastTick = getTickCount()
-addEventHandler("onClientRender", root, function()
-    local tick = getTickCount()
-    fps = math.floor(1000 / (tick - lastTick))
-    lastTick = tick
-end)
-
----------------------------------------
--- RADAR FUNKCJE
----------------------------------------
-local function worldToMap(x, y)
-    return (x + 3000) / 6000 * mapSize, mapSize - (y + 3000) / 6000 * mapSize
-end
-
----------------------------------------
--- RENDER
----------------------------------------
 addEventHandler("onClientRender", root, function()
     if not showHUD then return end
 
-    ---------------------------------------
-    -- RADAR LEWY DÓŁ
-    ---------------------------------------
-
-    local radarSize = 220
-    local radarX = 20
-    local radarY = screenH - radarSize - 60
-
-    local px, py = getElementPosition(localPlayer)
-    local camRotZ = select(3, getElementRotation(getCamera()))
-
-    local mapX, mapY = worldToMap(px, py)
-
-    dxDrawRectangle(radarX, radarY, radarSize, radarSize, tocolor(0, 0, 0, 140))
-
-    dxDrawImageSection(
-        radarX, radarY,
-        radarSize, radarSize,
-        mapX - 50, mapY - 50,
-        100, 100,
-        mapImage,
-        -camRotZ
-    )
-
-    -- Gracz
-    dxDrawLine(
-        radarX + radarSize/2, radarY + radarSize/2,
-        radarX + radarSize/2, radarY + radarSize/2 - 10,
-        tocolor(255, 0, 0, 220), 2
-    )
-    dxDrawCircle(radarX + radarSize/2, radarY + radarSize/2, 3, 0, 360, tocolor(255,255,255,230))
-
-    dxDrawText(
-        "FPS: "..fps.." | Ping: "..getPlayerPing(localPlayer).."ms",
-        radarX + 5, radarY + radarSize + 10,
-        0, 0, tocolor(255,255,255,200), 0.85, honeySalt
-    )
-
-    ---------------------------------------
-    -- HUD PRAWY GÓRNY
-    ---------------------------------------
-
-    local hudW, hudH = 350, 230
-    local hudX = screenW - hudW - 30
-    local hudY = 30
-
-    dxDrawRectangle(hudX, hudY, hudW, hudH, tocolor(0, 0, 0, 150))
-
-    local hp = getElementHealth(localPlayer) or 100
-    local arm = getPedArmor(localPlayer) or 0
-    local money = getPlayerMoney(localPlayer) or 0
+    -------------------------------------------------
+    -- Dane gracza
+    -------------------------------------------------
+    local hp = getElementHealth(localPlayer)
+    local armour = getPedArmor(localPlayer)
+    local money = getPlayerMoney(localPlayer)
+    local hunger = getElementData(localPlayer, "player:hunger") or 100
+    local thirst = getElementData(localPlayer, "player:thirst") or 100
     local nick = getPlayerName(localPlayer)
 
+    local ping = getPlayerPing(localPlayer)
+
+    local time = getRealTime()
+    local day = time.monthday
+    local month = time.month + 1
+    local year = time.year + 1900
+    local hour = time.hour
+    local minute = time.minute
+
+    -------------------------------------------------
+    -- Smooth animacja
+    -------------------------------------------------
+    smooth.hp = smooth.hp + (hp - smooth.hp) * 0.1
+    smooth.armour = smooth.armour + (armour - smooth.armour) * 0.1
+    smooth.hunger = smooth.hunger + (hunger - smooth.hunger) * 0.08
+    smooth.thirst = smooth.thirst + (thirst - smooth.thirst) * 0.08
+
+    -------------------------------------------------
+    -- RADAR (Lewy dolny róg)
+    -------------------------------------------------
+    local radarSize = sx(260)
+    local radarX = sx(20)
+    local radarY = screenH - radarSize - sy(150)
+
+    dxDrawRectangle(radarX - sx(6), radarY - sy(6), radarSize + sx(12), radarSize + sy(12), tocolor(8, 12, 16, 200))
+
+    -- radar obraz
+    if texRadar then
+        dxDrawImage(radarX, radarY, radarSize, radarSize, texRadar)
+    else
+        dxDrawRectangle(radarX, radarY, radarSize, radarSize, tocolor(50, 50, 50, 200))
+    end
+
+    -------------------------------------------------
+    -- GŁÓD + PRAGNIENIE (po prawej od radaru)
+    -------------------------------------------------
+    local barW = sx(12)
+    local barH = sy(130)
+    local barX = radarX + radarSize + sx(25)
+    local barY = radarY
+
+    -- głód
+    dxDrawText("GŁÓD", barX, barY - sy(20), barX + sx(80), barY, tocolor(230,230,230), sx(0.9), fontMain)
+    dxDrawRectangle(barX, barY, barW, barH, tocolor(40,40,40,180))
+    dxDrawRectangle(barX, barY + (barH - barH*(smooth.hunger/100)), barW, barH*(smooth.hunger/100), tocolor(255,165,0,230))
+
+    -- pragnienie
+    local tY = barY + barH + sy(40)
+    dxDrawText("WODA", barX, tY - sy(20), barX + sx(80), tY, tocolor(230,230,230), sx(0.9), fontMain)
+    dxDrawRectangle(barX, tY, barW, barH, tocolor(40,40,40,180))
+    dxDrawRectangle(barX, tY + (barH - barH*(smooth.thirst/100)), barW, barH*(smooth.thirst/100), tocolor(80,180,255,230))
+
+    -------------------------------------------------
+    -- FPS + PING + DATA/GODZINA (pod radarem)
+    -------------------------------------------------
+    local infoY = radarY + radarSize + sy(14)
+
+    dxDrawText(
+        string.format("FPS: %d  |  Ping: %d ms", fps, ping),
+        radarX, infoY,
+        radarX + radarSize, infoY + sy(20),
+        tocolor(230,230,230),
+        sx(0.9), fontMain, "center"
+    )
+
+    dxDrawText(
+        string.format("%02d.%02d.%d  |  %02d:%02d", day, month, year, hour, minute),
+        radarX, infoY + sy(22),
+        radarX + radarSize, infoY + sy(40),
+        tocolor(210,210,210),
+        sx(0.9), fontMain, "center"
+    )
+
+    -------------------------------------------------
+    -- HUD (Prawy górny róg)
+    -------------------------------------------------
+    local hudX = screenW - sx(260) - sx(40)
+    local hudY = sy(40)
+
+    -- tło
+    dxDrawRectangle(hudX, hudY, sx(260), sy(160), tocolor(8, 12, 16, 180))
+
+    -------------------------------------------------
     -- HP
-    dxDrawImage(hudX + 20, hudY + 25, 26, 26, iconHP)
-    dxDrawRectangle(hudX + 55, hudY + 30, 250, 12, tocolor(50,50,50,200))
-    dxDrawRectangle(hudX + 55, hudY + 30, 250 * (hp / 100), 12, tocolor(0, 130, 255, 220))
+    -------------------------------------------------
+    dxDrawImage(hudX + sx(10), hudY + sy(10), sx(32), sy(32), texHP)
+    dxDrawRectangle(hudX + sx(50), hudY + sy(20), sx(200), sy(14), tocolor(40,40,40,200))
+    dxDrawRectangle(hudX + sx(50), hudY + sy(20), sx(200 * (smooth.hp / 100), sy(14)), tocolor(255,80,80,220))
 
+    -------------------------------------------------
     -- ARMOUR
-    dxDrawImage(hudX + 20, hudY + 65, 26, 26, iconArmour)
-    dxDrawRectangle(hudX + 55, hudY + 70, 250, 12, tocolor(50,50,50,200))
-    dxDrawRectangle(hudX + 55, hudY + 70, 250 * (arm / 100), 12, tocolor(180,180,180,220))
+    -------------------------------------------------
+    dxDrawImage(hudX + sx(10), hudY + sy(55), sx(32), sy(32), texArmour)
+    dxDrawRectangle(hudX + sx(50), hudY + sy(65), sx(200), sy(14), tocolor(40,40,40,200))
+    dxDrawRectangle(hudX + sx(50), hudY + sy(65), sx(200 * (smooth.armour / 100), sy(14)), tocolor(120,170,255,220))
 
-    -- MONEY
-    dxDrawText("$ "..money, hudX + 20, hudY + 115, 0, 0, tocolor(255,255,255,255), 1.2, honeySalt)
-
-    -- NICK
-    dxDrawText("NICK: "..nick, hudX + 20, hudY + 155, 0, 0, tocolor(230,230,230,255), 1.0, honeySalt)
-
-    -- DATE + TIME
-    local rt = getRealTime()
-    local hour = string.format("%02d", rt.hour)
-    local minute = string.format("%02d", rt.minute)
-    local day = string.format("%02d", rt.monthday)
-    local month = string.format("%02d", rt.month + 1)
-    local year = rt.year + 1900
-
-    dxDrawText(day.."."..month.."."..year, hudX + 20, hudY + 195, 0, 0, tocolor(210,210,210,255), 0.9, honeySalt)
-    dxDrawText(hour..":"..minute, hudX + hudW - 80, hudY + 195, 0, 0, tocolor(210,210,210,255), 0.9, honeySalt)
+    -------------------------------------------------
+    -- MONEY + NICK
+    -------------------------------------------------
+    dxDrawText(nick, hudX + sx(10), hudY + sy(100), hudX + sx(250), hudY + sy(120), tocolor(240,240,240), sx(0.95), fontMain)
+    dxDrawText("$"..tostring(money), hudX + sx(10), hudY + sy(125), hudX + sx(250), hudY + sy(145), tocolor(140,255,140), sx(1), fontMain)
 end)
