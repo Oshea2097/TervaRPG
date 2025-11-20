@@ -3,14 +3,17 @@
 local sx, sy = guiGetScreenSize()
 local scale = sx / 1920
 
-local iconHeart = dxCreateTexture("images/heart.png")
-local iconArmor = dxCreateTexture("images/armor.png")
+-- Czcionka Honey Salt
+local fontMain = dxCreateFont("fonts/HoneySalt.otf", 30 * scale)
+
+-- Tło hud.png
+local bgHud = dxCreateTexture("images/bg.png")
 
 -------------------------------------------------------
--- WYŁĄCZENIE STANDARDOWEGO GTA HUD
+-- WYŁĄCZENIE STANDARDOWEGO HUD GTA
 -------------------------------------------------------
 addEventHandler("onClientResourceStart", resourceRoot, function()
-    showPlayerHudComponent("radar", true)      -- radar zostaje
+    showPlayerHudComponent("radar", true)
     showPlayerHudComponent("health", false)
     showPlayerHudComponent("armour", false)
     showPlayerHudComponent("money", false)
@@ -21,25 +24,25 @@ addEventHandler("onClientResourceStart", resourceRoot, function()
 end)
 
 -------------------------------------------------------
--- HUD POZYCJE
+-- POZYCJE HUD
 -------------------------------------------------------
-local hudW = 340 * scale
-local hudH = 150 * scale
+local hudW = 420 * scale
+local hudH = 220 * scale
 local hudX = sx - hudW - 40 * scale
 local hudY = 40 * scale
 
 -------------------------------------------------------
--- RENDER PRZEJRZYSTEGO, ŁADNEGO HUDU
+-- RYSOWANIE HUDU
 -------------------------------------------------------
 function drawHUD()
 
     ---------------------------------------------------
-    -- PANEL (łagodne zaokrąglone tło jak na Twoim screenie)
+    -- TŁO HUD → ZAMIANA PROSTOKĄTA NA GRAFIKĘ
     ---------------------------------------------------
-    dxDrawRectangle(hudX, hudY, hudW, hudH, tocolor(15,15,15,160))
+    dxDrawImage(hudX, hudY, hudW, hudH, bgHud)
 
     ---------------------------------------------------
-    -- HP / ARMOR
+    -- HP & ARMOR (IDENTYCZNIE JAK BYŁO WCZEŚNIEJ)
     ---------------------------------------------------
     local hp = getElementHealth(localPlayer)
     local armor = getPedArmor(localPlayer)
@@ -47,41 +50,43 @@ function drawHUD()
     local hpP = math.min(hp, 100) / 100
     local arP = math.min(armor, 100) / 100
 
-    local iconS = 22 * scale
-
     -- HP
-    dxDrawImage(hudX + 20*scale, hudY + 25*scale, iconS, iconS, iconHeart)
-    dxDrawRectangle(hudX + 60*scale, hudY + 32*scale, 230*scale, 9*scale, tocolor(50,50,50,150))
-    dxDrawRectangle(hudX + 60*scale, hudY + 32*scale, 230*scale * hpP, 9*scale, tocolor(0,150,255,245))
+    dxDrawRectangle(hudX + 60*scale, hudY + 50*scale, 260*scale, 12*scale, tocolor(50,50,50,150))
+    dxDrawRectangle(hudX + 60*scale, hudY + 50*scale, 260*scale * hpP, 12*scale, tocolor(0,150,255,245))
 
     -- ARMOR
-    dxDrawImage(hudX + 20*scale, hudY + 72*scale, iconS, iconS, iconArmor)
-    dxDrawRectangle(hudX + 60*scale, hudY + 78*scale, 230*scale, 9*scale, tocolor(50,50,50,150))
-    dxDrawRectangle(hudX + 60*scale, hudY + 78*scale, 230*scale * arP, 9*scale, tocolor(180,180,180,240))
+    dxDrawRectangle(hudX + 60*scale, hudY + 95*scale, 260*scale, 12*scale, tocolor(50,50,50,150))
+    dxDrawRectangle(hudX + 60*scale, hudY + 95*scale, 260*scale * arP, 12*scale, tocolor(180,180,180,240))
 
     ---------------------------------------------------
-    -- MONEY / NICK / DATA / GODZINA
+    -- TEKSTY W OBRYSIE HUDU
     ---------------------------------------------------
     local rt = getRealTime()
     local dateStr = string.format("%02d.%02d.%04d", rt.monthday, rt.month+1, rt.year+1900)
     local hourStr = string.format("%02d:%02d", rt.hour, rt.minute)
 
-    dxDrawText("$"..getPlayerMoney(localPlayer),
-        hudX + 20*scale, hudY + 115*scale,
-        nil, nil, tocolor(255,255,255),
-        1*scale, "default-bold"
+    dxDrawText(
+        "$"..getPlayerMoney(localPlayer),
+        hudX + 50*scale, hudY + 135*scale,
+        hudX + hudW - 50*scale, nil,
+        tocolor(255,255,255),
+        1.0 * scale, fontMain, "left", "top"
     )
 
-    dxDrawText("Nick: "..getPlayerName(localPlayer),
-        hudX + 20*scale, hudY + 135*scale,
-        nil, nil, tocolor(230,230,230),
-        0.9*scale, "default"
+    dxDrawText(
+        getPlayerName(localPlayer),
+        hudX + 50*scale, hudY + 165*scale,
+        hudX + hudW - 50*scale, nil,
+        tocolor(230,230,230),
+        0.9 * scale, fontMain, "left", "top"
     )
 
-    dxDrawText(dateStr.."   |   "..hourStr,
-        hudX + 20*scale, hudY + 157*scale,
-        nil, nil, tocolor(220,220,220),
-        0.9*scale, "default"
+    dxDrawText(
+        dateStr .. "   |   " .. hourStr,
+        hudX + 50*scale, hudY + 195*scale,
+        hudX + hudW - 50*scale, nil,
+        tocolor(200,200,200),
+        0.9 * scale, fontMain, "left", "top"
     )
 
     ---------------------------------------------------
@@ -92,10 +97,11 @@ function drawHUD()
 
     dxDrawText(
         "FPS "..fps.."   |   Ping "..ping.."ms   |   "..hourStr,
-        40*scale, sy - 260*scale + 220*scale,
-        300*scale, nil,
-        tocolor(255,255,255), 0.85*scale,
-        "default-bold", "left"
+        40 * scale, sy - 180 * scale,
+        300 * scale, nil,
+        tocolor(255,255,255),
+        0.75 * scale, fontMain,
+        "left"
     )
 end
 
