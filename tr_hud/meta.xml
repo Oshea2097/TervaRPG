@@ -1,0 +1,10 @@
+<meta>
+  <info author="TervaRPG Dev" name="tr_hud" version="1.0" />
+  <script src="hud.lua" type="client" />
+  <files>
+    <file src="images/radar.png" />
+    <file src="images/icon_hp.png" />
+    <file src="images/icon_armour.png" />
+    <file src="fonts/HoneySalt.ttf" />
+  </files>
+</meta>
