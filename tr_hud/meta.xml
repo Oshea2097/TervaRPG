@@ -1,10 +1,15 @@
 <meta>
-  <info author="TervaRPG Dev" name="tr_hud" version="1.0" />
-  <script src="hud.lua" type="client" />
-  <files>
-    <file src="images/radar.png" />
-    <file src="images/icon_hp.png" />
-    <file src="images/icon_armour.png" />
-    <file src="fonts/HoneySalt.ttf" />
-  </files>
+    <info author="Terva" version="1.0" name="Custom HUD" type="script" />
+
+    <!-- Główny skrypt klienta -->
+    <script src="hud.lua" type="client" />
+
+    <!-- Czcionka Honey Salt -->
+    <file src="fonts/HoneySalt.otf" />
+
+    <!-- Tło HUD -->
+    <file src="images/bg.png" />
+
+    <!-- Upewniam się że foldery istnieją -->
+    <oop>false</oop>
 </meta>
